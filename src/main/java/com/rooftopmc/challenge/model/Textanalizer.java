@@ -1,14 +1,14 @@
 package com.rooftopmc.challenge.model;
 
-import com.google.common.hash.HashCode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rooftopmc.challenge.utils.CustomUtils;
 import lombok.Data;
 import org.springframework.util.DigestUtils;
 
 import javax.persistence.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Data
@@ -22,7 +22,9 @@ public class Textanalizer {
 
     String hash;
 
-    String text;
+    @JsonIgnore
+    @Transient
+    transient String text;
 
     int chars;
 
@@ -36,8 +38,8 @@ public class Textanalizer {
     public Textanalizer(){}
 
     public Textanalizer(String text, int chars) {
-        this.text = text;
-        this.chars = chars;
+        this.text = text.toLowerCase(Locale.ROOT);
+        this.chars = (Math.max(chars, 2));
         initialize();
     }
 
@@ -51,17 +53,19 @@ public class Textanalizer {
         // Create result Map
         if(this.text.length() > 0 && this.text.length() > this.chars) {
             for(int i = 0; i < this.text.length() - this.chars + 1; i++) {
-                String mapKey = text.substring(i, i + this.chars);
+                String mapKey = this.text.substring(i, i + this.chars);
                 Integer value = (this.results.getOrDefault(mapKey, 0));
                 value++;
                 this.results.put(mapKey, value);
             }
+        } else {
+            this.results.put(this.text, 1);
         }
     }
 
     private void createHash() {
         // save hashCode
-        this.hash = DigestUtils.md5DigestAsHex((this.text + this.chars).getBytes(StandardCharsets.UTF_8));
+        this.hash = CustomUtils.hashForTextanalizer(this.text, this.chars);
     }
 
 }

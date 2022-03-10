@@ -4,6 +4,8 @@ import com.rooftopmc.challenge.exceptions.TextanalizerNotFoundException;
 import com.rooftopmc.challenge.model.Textanalizer;
 import com.rooftopmc.challenge.repository.TextanalizerRepository;
 import com.rooftopmc.challenge.request.TextanalizerRequest;
+import com.rooftopmc.challenge.response.TextanalizerResponse;
+import com.rooftopmc.challenge.utils.CustomUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,9 +24,13 @@ public class TextanalizerService {
     }
 
     @Transactional
-    public Textanalizer create(TextanalizerRequest request) {
-        Textanalizer textanalizer = new Textanalizer(request.getText(), request.getChars());
-        return this.textanalizerRepository.save(textanalizer);
+    public TextanalizerResponse create(TextanalizerRequest request) {
+        String hash = CustomUtils.hashForTextanalizer(request.getText(), request.getChars());
+        Optional<Textanalizer> textanalizer = this.textanalizerRepository.findByHash(hash);
+        if(textanalizer.isPresent())
+            return new TextanalizerResponse(textanalizer.get().getId());
+        else
+            return new TextanalizerResponse(this.textanalizerRepository.save( new Textanalizer(request.getText(), request.getChars())).getId());
     }
 
     @Transactional
