@@ -3,22 +3,27 @@ package com.rooftopmc.challenge.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rooftopmc.challenge.utils.CustomUtils;
 import lombok.Data;
-import org.springframework.util.DigestUtils;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 @Data
 @Entity
+@SQLDelete(sql = "UPDATE textanalizer SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 @Table(name = "textanalizer")
 public class Textanalizer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     String id;
+
+    @JsonIgnore
+    boolean deleted = Boolean.FALSE;
 
     String hash;
 
@@ -30,7 +35,7 @@ public class Textanalizer {
 
     @ElementCollection
     @CollectionTable(name = "subtext_count",
-            joinColumns = { @JoinColumn(name = "textanalizer_id") })
+            joinColumns = {@JoinColumn(name = "textanalizer_id")})
     @MapKeyColumn(name = "subtext")
     @Column(name = "count")
     Map<String, Integer> results = new HashMap<>();

@@ -36,9 +36,9 @@ public class TextanalizerController {
     public ResponseEntity<TextanalizerResponse> newTextanalizer(@RequestBody TextanalizerRequest textanalizerRequest){
         return new ResponseEntity<>(this.textanalizerService.create(textanalizerRequest), HttpStatus.CREATED);
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<String> removeTextanalizer(@PathVariable("id") String id){
-        return ResponseEntity.ok(this.textanalizerService.delete(id));
+        return ResponseEntity.ok(this.textanalizerService.delete(id) + "{}");
     }
 
 }
