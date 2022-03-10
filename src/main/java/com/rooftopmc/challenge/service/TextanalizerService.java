@@ -4,6 +4,7 @@ import com.rooftopmc.challenge.exceptions.TextanalizerNotFoundException;
 import com.rooftopmc.challenge.model.Textanalizer;
 import com.rooftopmc.challenge.repository.TextanalizerRepository;
 import com.rooftopmc.challenge.request.TextanalizerRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +23,7 @@ public class TextanalizerService {
 
     @Transactional
     public Textanalizer create(TextanalizerRequest request) {
-        Textanalizer textanalizer = new Textanalizer();
-        textanalizer.setText(request.getText());
-        textanalizer.setChars(request.getChars());
+        Textanalizer textanalizer = new Textanalizer(request.getText(), request.getChars());
         return this.textanalizerRepository.save(textanalizer);
     }
 
@@ -39,8 +38,27 @@ public class TextanalizerService {
         }
     }
 
-    public List<Textanalizer> findAll() {
-        return this.textanalizerRepository.findAll();
+    public List<Textanalizer> findPage(int chars, int page, int rpp) {
+        page = getPageFixed(page);
+
+        rpp = getRppFixed(rpp);
+
+        Pageable pageable = Pageable.ofSize(rpp).withPage(page);
+        return this.textanalizerRepository.findAllPageable(chars, pageable).toList();
+    }
+
+    private int getPageFixed(int page) {
+        /* Page arrangements */
+        page--;
+        if(page < 0) page = 0;
+        return page;
+    }
+
+    private int getRppFixed(int rpp) {
+        /* rpp arrangements */
+        if(rpp < 10) rpp = 10;
+        if(rpp > 100) rpp = 100;
+        return rpp;
     }
 
     public Textanalizer findOne(String id) {

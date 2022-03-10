@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/text")
 @Api(tags = "text", value = "Text API")
 public class TextanalizerController {
@@ -39,8 +40,11 @@ public class TextanalizerController {
             @ApiResponse(code = 200,message = "All texts found"),
             @ApiResponse(code = 404,message = "All texts not found")
     })
-    public ResponseEntity<List<Textanalizer>> findAll(@RequestParam("chars") String chars, @RequestParam("page") String page, @RequestParam("rpp") String rpp){
-        return ResponseEntity.ok(this.textanalizerService.findAll());
+    public ResponseEntity<List<Textanalizer>> findPage(
+            @RequestParam(value = "chars", required = false, defaultValue = "2") int chars,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "rpp", required = false, defaultValue = "10") int rpp){
+        return ResponseEntity.ok(this.textanalizerService.findPage(chars, page, rpp));
     }
     @PostMapping
     @ApiOperation(value = "Create analyzed text", notes = "It allows to create and store an analyzed text")
@@ -48,7 +52,7 @@ public class TextanalizerController {
             @ApiResponse(code = 201,message = "Analyzed text created successfully"),
             @ApiResponse(code = 400,message = "Invalid request")
     })
-    public ResponseEntity<Textanalizer> newTextanalizer(TextanalizerRequest textanalizerRequest){
+    public ResponseEntity<Textanalizer> newTextanalizer(@RequestBody TextanalizerRequest textanalizerRequest){
         return new ResponseEntity<>(this.textanalizerService.create(textanalizerRequest), HttpStatus.CREATED);
     }
     @DeleteMapping("/{id}")
